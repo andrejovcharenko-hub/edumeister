@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduMeister Live 6.0 - Realtime Edition</title>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --text-main: #ffffff;
+            --accent: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --radius: 12px;
+            --font: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Age Themes for Student */
+        .theme-kids {
+            --bg-color: #e0f2fe;
+            --panel-bg: #ffffff;
+            --text-main: #0f172a;
+            --accent: #f59e0b;
+            --radius: 24px;
+            --font: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        .theme-sleek {
+            --bg-color: #1e293b;
+            --panel-bg: #334155;
+            --text-main: #f8fafc;
+            --accent: #3b82f6;
+            --radius: 8px;
+            --font: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: #000;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .role-selector button {
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .role-selector button.active { background: var(--accent); }
+
+        .container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Views */
+        .view { display: none; width: 100%; padding: 20px; box-sizing: border-box; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* Zoom Public View */
+        #zoom-view { align-items: center; justify-content: center; text-align: center; }
+        .boss-arena {
+            background: var(--panel-bg);
+            padding: 40px;
+            border-radius: var(--radius);
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+            width: 80%;
+            max-width: 800px;
+        }
+        .hp-bar-bg { background: #333; height: 30px; border-radius: 15px; overflow: hidden; margin-top: 20px; }
+        .hp-bar-fill { background: var(--danger); height: 100%; width: 100%; transition: width 0.3s ease; }
+
+        /* Teacher View */
+        #teacher-view { max-width: 600px; margin: 0 auto; }
+        .control-panel { background: var(--panel-bg); padding: 20px; border-radius: var(--radius); }
+        .stage-btn {
+            display: block; width: 100%; padding: 15px; margin-bottom: 10px;
+            background: #333; color: white; border: none; border-radius: 8px; cursor: pointer;
+        }
+        .stage-btn:hover { background: var(--accent); }
+
+        /* Student View */
+        #student-view { max-width: 400px; margin: 0 auto; }
+        .action-btn {
+            width: 100%; padding: 20px; margin-bottom: 15px;
+            background: var(--accent); color: white; border: none;
+            border-radius: var(--radius); font-size: 18px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .theme-selector { margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .theme-selector select { width: 100%; padding: 10px; border-radius: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div><strong>EduMeister 6.0</strong> | 🇩🇪 Lektion 17: Trennbare Verben</div>
+        <div class="role-selector">
+            <button onclick="window.setRole('zoom')" id="btn-zoom" class="active">🖥 Zoom Екран</button>
+            <button onclick="window.setRole('teacher')" id="btn-teacher">👨‍🏫 Вчитель</button>
+            <button onclick="window.setRole('student')" id="btn-student">📱 Учень</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- ZOOM SCREEN -->
+        <div id="zoom-view" class="view active">
+            <div class="boss-arena">
+                <h1 id="zoom-title">Етап 1: Теорія</h1>
+                <h2 style="color: var(--accent);">Ich stehe jeden Tag um 7 Uhr <span style="color: #f97316;">auf</span>.</h2>
+                
+                <div id="zoom-boss" style="display: none; margin-top: 40px;">
+                    <h3>👾 БОС: Der Zeit-Räuber</h3>
+                    <div class="hp-bar-bg"><div class="hp-bar-fill" id="boss-hp-bar"></div></div>
+                    <p>Здоров'я Боса: <span id="boss-hp-text">1000</span> / 1000</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEACHER SCREEN -->
+        <div id="teacher-view" class="view">
+            <h2>Пульт Вчителя</h2>
+            <div class="control-panel">
+                <h3>Керування уроком:</h3>
+                <button class="stage-btn" onclick="window.setStage(1)">1. Теорія (Satzklammer)</button>
+                <button class="stage-btn" onclick="window.setStage(2)">2. Письмо (Зошит)</button>
+                <button class="stage-btn" onclick="window.setStage(3)">3. Битва з Босом</button>
+                <button class="stage-btn" onclick="window.setStage(4)" style="background: var(--success);">4. Перемога!</button>
+                
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+                <button class="stage-btn" onclick="window.resetBoss()" style="background: var(--danger);">Скинути здоров'я Боса</button>
+            </div>
+        </div>
+
+        <!-- STUDENT SCREEN -->
+        <div id="student-view" class="view">
+            <div class="theme-selector">
+                <label>🎨 Дизайн для учня:</label>
+                <select id="theme-select" onchange="window.changeTheme(this.value)">
+                    <option value="cyber">12-16 років (Кібер-гейміфікація)</option>
+                    <option value="kids">До 11 років (Яскравий 3D)</option>
+                    <option value="sleek">17+ років (Стриманий Преміум)</option>
+                </select>
+            </div>
+
+            <h2 id="student-title">Очікування...</h2>
+            
+            <div id="student-actions">
+                <p>Уважно дивіться на екран вчителя у Zoom.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDKG2AJawh1E3GA6Ez7A4YQZ9myQWZrTFY",
+            authDomain: "edumeister-a9e94.firebaseapp.com",
+            projectId: "edumeister-a9e94",
+            storageBucket: "edumeister-a9e94.firebasestorage.app",
+            messagingSenderId: "617784517446",
+            appId: "1:617784517446:web:7cb82a6c40b985bc203b47",
+            databaseURL: "https://edumeister-a9e94-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Database References
+        const stageRef = ref(db, 'session/stage');
+        const bossHpRef = ref(db, 'session/bossHp');
+
+        // Explicit Global Bindings for UI Handlers
+        window.setStage = function(stageNumber) {
+            set(stageRef, stageNumber);
+        };
+
+        window.resetBoss = function() {
+            set(bossHpRef, 1000);
+        };
+
+        window.attackBoss = function() {
+            let currentHpText = document.getElementById('boss-hp-text')?.innerText || "1000";
+            let currentHp = parseInt(currentHpText);
+            let newHp = Math.max(0, currentHp - 150);
+            set(bossHpRef, newHp);
+        };
+
+        window.setRole = function(role) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.role-selector button').forEach(el => el.classList.remove('active'));
+            
+            const targetView = document.getElementById(`${role}-view`);
+            const targetBtn = document.getElementById(`btn-${role}`);
+            
+            if (targetView) targetView.classList.add('active');
+            if (targetBtn) targetBtn.classList.add('active');
+        };
+
+        window.changeTheme = function(theme) {
+            document.body.className = '';
+            if (theme !== 'cyber') document.body.classList.add(`theme-${theme}`);
+        };
+
+        // Realtime Listeners
+        onValue(stageRef, (snapshot) => {
+            const stage = snapshot.val() || 1;
+            updateInterfaceForStage(stage);
+        });
+
+        onValue(bossHpRef, (snapshot) => {
+            const hp = snapshot.val() !== null ? snapshot.val() : 1000;
+            const hpText = document.getElementById('boss-hp-text');
+            const hpBar = document.getElementById('boss-hp-bar');
+            
+            if (hpText) hpText.innerText = hp;
+            if (hpBar) hpBar.style.width = (hp / 10) + '%';
+        });
+
+        function updateInterfaceForStage(stage) {
+            const zoomTitle = document.getElementById('zoom-title');
+            const zoomBoss = document.getElementById('zoom-boss');
+            const studentTitle = document.getElementById('student-title');
+            const studentActions = document.getElementById('student-actions');
+
+            if (stage === 1) {
+                if (zoomTitle) zoomTitle.innerText = "Етап 1: Теорія";
+                if (zoomBoss) zoomBoss.style.display = 'none';
+                if (studentTitle) studentTitle.innerText = "Теорія";
+                if (studentActions) {
+                    studentActions.innerHTML = `
+                        <p>Уважно слухайте вчителя та дивіться на правило.</p>
+                        <button class="action-btn" onclick="alert('Вчитель бачить, що ви зрозуміли!')">💡 Зрозуміло!</button>
+                    `;
+                }
+            } else if (stage === 2) {
+                if (zoomTitle) zoomTitle.innerText = "Етап 2: Робота в зошиті";
+                if (zoomBoss) zoomBoss.style.display = 'none';
+                if (studentTitle) studentTitle.innerText = "Завдання у зошиті";
+                if (studentActions) {
+                    studentActions.innerHTML = `
+                        <p>Запишіть 3 речення. Після цього зробіть фото.</p>
+                        <button class="action-btn" style="background: #10b981;" onclick="alert('Фото безпечно завантажено та перевірено на віруси!')">📸 Здати фото</button>
+                    `;
+                }
+            } else if (stage === 3) {
+                if (zoomTitle) zoomTitle.innerText = "Етап 3: Битва з Босом!";
+                if (zoomBoss) zoomBoss.style.display = 'block';
+                if (studentTitle) studentTitle.innerText = "Атакуй Боса!";
+                if (studentActions) {
+                    studentActions.innerHTML = `
+                        <p>Am Abend _____ ich mein Zimmer _____.</p>
+                        <button class="action-btn" onclick="window.attackBoss()">[A] räume ... auf</button>
+                        <button class="action-btn" style="background: #374151;" onclick="alert('Неправильно!')">[B] aufräume ...</button>
+                        <button class="action-btn" style="background: #374151;" onclick="alert('Неправильно!')">[C] räume ... an</button>
+                    `;
+                }
+            } else if (stage === 4) {
+                if (zoomTitle) zoomTitle.innerText = "🎉 Перемога! Урок завершено.";
+                if (zoomBoss) zoomBoss.style.display = 'none';
+                if (studentTitle) studentTitle.innerText = "Ви перемогли!";
+                if (studentActions) {
+                    studentActions.innerHTML = `<p>+450 XP за урок. Чудова робота!</p>`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>
